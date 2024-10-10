@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" href="./home.css">
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registrationForm">
+        <input type="text" id="registerName" placeholder="Name" required><br>
+        <input type="email" id="registerEmail" placeholder="Email" required><br>
+        <input type="password" id="registerPassword" placeholder="Password" required><br>
+        <button type="submit">Register</button>
+    </form>
+
+    <p id="registerMessage"></p> <!-- To display success or error message -->
+
+    <script>
+        document.getElementById("registrationForm").addEventListener("submit", async function(event) {
+            event.preventDefault();  // Prevent the default form submission
+            const name = document.getElementById("registerName").value;
+            const email = document.getElementById("registerEmail").value;
+            const password = document.getElementById("registerPassword").value;
+
+            try {
+                const response = await fetch("/api/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const result = await response.text();
+                if (response.ok) {
+                    document.getElementById("registerMessage").innerText = "Registration successful!";
+                } else {
+                    document.getElementById("registerMessage").innerText = result;
+                }
+            } catch (error) {
+                document.getElementById("registerMessage").innerText = "Error registering!";
+            }
+        });
+    </script>
+</body>
+</html>

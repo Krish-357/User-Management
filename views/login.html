@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="./home.css">
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required><br>
+        <input type="password" id="loginPassword" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="loginMessage"></p> <!-- To display success or error message -->
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+            event.preventDefault();  // Prevent the default form submission
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+    
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+    
+                const result = await response.json(); // Get the JSON response
+                if (response.ok) {
+                    document.getElementById("loginMessage").innerText = "Login successful!";
+                    // Redirect to dashboard
+                    window.location.href = result.redirect; // Use the redirect URL from the response
+                } else {
+                    document.getElementById("loginMessage").innerText = result; // Display error message
+                }
+            } catch (error) {
+                document.getElementById("loginMessage").innerText = "Error logging in!";
+            }
+        });
+    </script>
+</body>
+</html>

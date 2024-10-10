@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="./home.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex; /* Flexbox for the two main columns */
+            justify-content: flex-start; /* Align left column to the start */
+            padding: 0 20px; /* Add horizontal padding */
+        }
+        .left-column {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 25%; /* Fixed width for left column */
+            min-width: 250px;
+            margin-right: 20px; /* Space between left and main content */
+        }
+        .main-content {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 70%; /* Fixed width for main content */
+            min-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        #welcomeMessage {
+            margin-bottom: 30px;
+            font-size: 20px;
+        }
+        .info-card {
+            margin-bottom: 20px;
+        }
+        .info-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+        .info-card p {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #333;
+        }
+        #logoutButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #logoutButton:hover {
+            background-color: #0056b3;
+        }
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #007bff;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #darkModeToggle {
+            cursor: pointer;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: black;
+        }
+        .dark-mode h1 {
+            color: #f0f0f0;
+        }
+        .dark-mode .info-card h3 {
+            color: #ffbb33;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>User Dashboard</h1>
+        <button id="darkModeToggle">Dark Mode</button>
+    </div>
+
+    <div class="container">
+        <!-- Left Column with User Info -->
+        <div class="left-column">
+            <div class="info-card">
+                <h3>Active Status</h3>
+                <p id="userActiveStatus">Fetching...</p>
+            </div>
+            <div class="info-card">
+                <h3>Performance</h3>
+                <p id="userPerformance">Fetching...</p>
+            </div>
+            <div class="info-card">
+                <h3>Task Completion</h3>
+                <p id="userTaskCompletion">Fetching...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <p id="welcomeMessage"></p> <!-- To display the welcome message -->
+            <div class="spinner" id="loadingSpinner"></div> <!-- Loading Spinner -->
+            <button id="logoutButton">Logout</button> <!-- Logout Button -->
+        </div>
+    </div>
+
+    <script>
+        const username = localStorage.getItem("username");
+
+        const sampleData = {
+            activeStatus: "Active for 5 hours this week",
+            performance: "Excellent",
+            taskCompletion: "12 out of 15 tasks completed"
+        };
+
+        const loadingSpinner = document.getElementById("loadingSpinner");
+
+        function showLoadingSpinner(show) {
+            loadingSpinner.style.display = show ? "block" : "none";
+        }
+
+        // Simulate data fetching delay
+        setTimeout(() => {
+            showLoadingSpinner(false);  // Hide the spinner after data is "fetched"
+
+            if (username) {
+                document.getElementById("welcomeMessage").innerText = `Welcome, ${username}!`;
+                document.getElementById("userActiveStatus").innerText = sampleData.activeStatus;
+                document.getElementById("userPerformance").innerText = sampleData.performance;
+                document.getElementById("userTaskCompletion").innerText = sampleData.taskCompletion;
+            } else {
+                document.getElementById("welcomeMessage").innerText = "Welcome to your dashboard! You can see active status, performance, and tasks completed.";
+                document.getElementById("userActiveStatus").innerText = "Active";
+                document.getElementById("userPerformance").innerText = "Excellent";
+                document.getElementById("userTaskCompletion").innerText = "Completed";
+            }
+        }, 2000);
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        let darkMode = false;
+
+        darkModeToggle.addEventListener("click", function() {
+            darkMode = !darkMode;
+            document.body.classList.toggle("dark-mode", darkMode);
+            darkModeToggle.innerText = darkMode ? "Light Mode" : "Dark Mode";
+        });
+
+        // Logout with confirmation
+        document.getElementById("logoutButton").addEventListener("click", async function() {
+            if (confirm("Are you sure you want to logout?")) {
+                try {
+                    const response = await fetch("/api/logout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (response.ok) {
+                        localStorage.removeItem("username");
+                        window.location.href = "/";
+                    } else {
+                        alert("Logout failed.");
+                    }
+                } catch (error) {
+                    alert("Error logging out.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
